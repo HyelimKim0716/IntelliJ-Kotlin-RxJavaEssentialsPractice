@@ -3,7 +3,7 @@ import io.reactivex.Observable
 
 fun main(args: Array<String>) {
     val list: ArrayList<String> = arrayListOf("hyelim", "nsStyle", "dongle", "clicli")
-    Observable.fromIterable(mutableListOf(list.toMutableList()))
+    Observable.fromIterable(list)
             .skip(2)
             .subscribe( { item -> System.out.println(item) },
                     { t -> System.out.println("Error = ${t.message}") })
@@ -12,7 +12,4 @@ fun main(args: Array<String>) {
             .skipLast(2)
             .subscribe(System.out::println)
 
-    Flowable.just(list)
-            .take(2)
-            .subscribe(System.out::println)
 }

@@ -6,7 +6,7 @@ fun main(args: Array<String>) {
 //    first(list)
 //    last(list)
 //    elementAt(list)
-    sample(list)
+//    sample(list)
     timeout(list)
     debounce(list)
 }
@@ -43,14 +43,14 @@ fun elementAt(list: MutableList<String>) {
 }
 
 fun sample(list: MutableList<String>) {
-    Observable.interval(3, TimeUnit.SECONDS)
+    Observable.interval(1, TimeUnit.SECONDS)
             .subscribe({
                 list.add("Add " + it)
                 System.out.println("interval list size = ${list.size}")
             })
 
     Observable.fromIterable(list)
-            .sample(1, TimeUnit.SECONDS)
+            .sample(3, TimeUnit.SECONDS)
             .subscribe({
                 System.out.println(it)
             }, {
@@ -62,7 +62,7 @@ fun sample(list: MutableList<String>) {
 
 fun timeout(list: MutableList<String>) {
     Observable.fromIterable(list)
-            .timeout(3, TimeUnit.SECONDS)
+            .timeout(5, TimeUnit.SECONDS)
             .subscribe({
                 System.out.println("next = $it")
             }, {
@@ -70,6 +70,12 @@ fun timeout(list: MutableList<String>) {
             }, {
                 System.out.println("completed")
             })
+
+    println("start ==")
+    list.add("a")
+    list.add("b")
+    list.add("c")
+    println("end ==")
 }
 
 fun debounce(list: MutableList<String>) {
@@ -82,4 +88,8 @@ fun debounce(list: MutableList<String>) {
             }, {
                 System.out.println("completed")
             })
+
+    list.add("a")
+    list.add("b")
+    list.add("c")
 }

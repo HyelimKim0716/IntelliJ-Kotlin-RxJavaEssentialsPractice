@@ -9,8 +9,8 @@ import java.util.*
 fun main(args: Array<String>) {
     val list : MutableList<String> = mutableListOf("Hayley", "NjStyle", "Dongle", "CliCli")
 //    map(list)
-//    flatMap(list)
-//    concatMap(list)
+//    flatMap(list)     // 순서 상관 없이 (인터리빙 허용)
+//    concatMap(list)     // 순서대로 (인터리빙 허용하지 않음)
 //    flatMapIterable(list)
 //    switchMapIterable(list)
 //    scan(list)
@@ -27,7 +27,7 @@ fun map(list: MutableList<String>) {
 
     Observable.fromIterable(list)
             .map(Function<String, Boolean> {
-                t -> t.toUpperCase().startsWith("H")
+                it.toUpperCase().startsWith("H")
             })
             .subscribe({
                 System.out.println("next = $it")
@@ -41,11 +41,16 @@ fun map(list: MutableList<String>) {
 fun flatMap(list: MutableList<String>) {
     Flowable.fromIterable(list)
             .flatMap(Function<String, Publisher<Any>> {
-                one ->
-                System.out.println(one)
-                Flowable.fromIterable(mutableListOf("Hayley", "Hyelim"))
+                one -> /*System.out.println(one)*/
+                Flowable.fromIterable(mutableListOf("a", "b")).map {
+                    it.toUpperCase() + one
+                }
             }).subscribe(System.out::println)
 
+
+    list.forEach {
+        println(it)
+    }
 }
 
 fun concatMap(list: MutableList<String>) {
@@ -70,7 +75,9 @@ fun flatMapIterable(list: MutableList<String>) {
 
 fun switchMapIterable(list: MutableList<String>) {
     Observable.fromIterable(list)
-            .switchMap { Observable.fromIterable(mutableListOf<Int>(1, 2, 3, 4, 5)) }
+            .switchMap { one -> Observable.fromIterable(mutableListOf<Int>(1, 2, 3, 4, 5)).map {
+                it.toString() + one
+            } }
             .subscribe({
                 System.out.println("next = $it")
             }, {
@@ -108,13 +115,8 @@ fun scan(list: MutableList<String>) {
 }
 
 fun groupBy(list: MutableList<String>) {
-    val groupedItems = Observable.fromIterable(list)
-            .groupBy {
-                val date = SimpleDateFormat("HH:mm:ss").format(Date())
-                it + date
-            }
-
-    Observable.concat(groupedItems)
+    val groupedItems = Observable.fromIterable(listOf(1, 2, 3, 4))
+            .groupBy { it %2 == 0 }
             .subscribe({
                 System.out.println("next = $it")
             }, {
@@ -122,6 +124,15 @@ fun groupBy(list: MutableList<String>) {
             }, {
                 System.out.println("completed")
             })
+
+//    Observable.concat(groupedItems)
+//            .subscribe({
+//                System.out.println("next = $it")
+//            }, {
+//                System.out.println("error = ${it.message}")
+//            }, {
+//                System.out.println("completed")
+//            })
 }
 
 fun buffer(list: MutableList<String>) {
@@ -136,7 +147,7 @@ fun buffer(list: MutableList<String>) {
             })
 
     Observable.fromIterable(list)
-            .buffer(2, 3)
+            .buffer(2, 1)
             .subscribe({
                 System.out.println("next = $it")
             }, {
@@ -150,6 +161,7 @@ fun window(list: MutableList<String>) {
     Observable.fromIterable(list)
             .window(2)
             .subscribe({
+                println("onNext=======")
                 it.map { it.toLowerCase() }
                         .subscribe(System.out::println)
 //                System.out.println("next = ${it.map { it.toLowerCase() }}")
@@ -162,6 +174,7 @@ fun window(list: MutableList<String>) {
     Observable.fromIterable(list)
             .window(2, 3)
             .subscribe({
+                println("onNext=======")
                 it.filter { it.contains("N") }
                         .subscribe(System.out::println)
 //                System.out.println("next = ${it.filter { it.contains("N") }}")
@@ -178,6 +191,6 @@ class Test2(val id:String, val password: String) : Test1("Test1", "Test1@gmail.c
 fun case() {
     val list: MutableList<Test1> = mutableListOf(Test1("Hyelim", "Hayley"), Test1("NjStyle", "njStyle"))
     Observable.fromIterable(list)
-            .cast(Test2::class.java)
+            .cast(String::class.java)
             .subscribe(System.out::println)
 }
