@@ -5,11 +5,6 @@ fun main(args: Array<String>) {
     testFilter()
 }
 fun testFilter() {
-    val list: ArrayList<String> = arrayListOf("hyelim", "nsStyle", "dongle", "clicli")
-
-    Observable.fromArray(list)
-            .subscribe { one ->
-
-                System.out.println(one)
-            }
+    Observable.fromArray(mutableListOf("hyelim", "nsStyle", "dongle", "clicli"))
+            .subscribe { one -> System.out.println(one) }
 }
