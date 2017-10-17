@@ -1,10 +1,5 @@
 import io.reactivex.Flowable
 import io.reactivex.Observable
-import io.reactivex.ObservableSource
-import io.reactivex.functions.Function
-import org.reactivestreams.Publisher
-import java.text.SimpleDateFormat
-import java.util.*
 
 fun main(args: Array<String>) {
     val list : MutableList<String> = mutableListOf("Hayley", "NjStyle", "Dongle", "CliCli")
@@ -26,7 +21,7 @@ fun map(list: MutableList<String>) {
             .subscribe(System.out::println)
 
     Observable.fromIterable(list)
-            .map(Function<String, Boolean> {
+            .map({
                 it.toUpperCase().startsWith("H")
             })
             .subscribe({
@@ -40,7 +35,7 @@ fun map(list: MutableList<String>) {
 
 fun flatMap(list: MutableList<String>) {
     Flowable.fromIterable(list)
-            .flatMap(Function<String, Publisher<Any>> {
+            .flatMap({
                 one -> /*System.out.println(one)*/
                 Flowable.fromIterable(mutableListOf("a", "b")).map {
                     it.toUpperCase() + one

@@ -1,6 +1,8 @@
 import io.reactivex.Observable
 import io.reactivex.ObservableSource
 import io.reactivex.functions.Function
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.function.BiFunction
 
@@ -16,7 +18,18 @@ fun main(args: Array<String>) {
 }
 
 fun merge() {
+    // Merge 하다 중간에 에러가 날 경우, stop -> error message
     Observable.merge(Observable.fromIterable(nameList), Observable.fromIterable(numList))
+            .subscribe({
+                println(it)
+            }, {
+                println("Error : " + it.message)
+            }, {
+                println("Completed")
+            })
+
+    // Merge 중 에러가 나더라도 Merge 수행 후 error message
+    Observable.mergeDelayError(Observable.fromIterable(nameList), Observable.fromIterable(numList))
             .subscribe({
                 println(it)
             }, {
@@ -27,11 +40,13 @@ fun merge() {
 }
 
 fun zip() {
-    Observable.zip(Observable.fromIterable(nameList), Observable.fromIterable(numList), object : BiFunction<String, Int, String>, io.reactivex.functions.BiFunction<String, Int, Any> {
-        override fun apply(t1: String, t2: Int): String {
-            return "$t1 $t2"
-        }
-    }).subscribe({
+    Observable.zip(Observable.fromIterable(nameList), Observable.fromIterable(numList),
+            io.reactivex.functions.BiFunction<String, Int, String> { t1, t2 -> "$t1 $t2" }
+//            object : BiFunction<String, Int, String>, io.reactivex.functions.BiFunction<String, Int, Any> {
+//        override fun apply(t1: String, t2: Int): String {
+//            return "$t1 $t2"
+//        }
+    ).subscribe({
         println(it)
     }, {
         println("Error : " + it.message)
@@ -43,27 +58,17 @@ fun zip() {
 fun join() {
     println("start")
     val oneSec = Observable.interval(1, TimeUnit.SECONDS)
-//            .subscribe({
-//                println("on next = " + it)
-//            }, {
-//                println("Error : " + it.message)
-//            }, {
-//                println("Completed")
-//            }).run { println("running!! ")}
-
-
-
     val twoSec = Observable.interval(2, TimeUnit.SECONDS)
 
     oneSec.join(
             twoSec,
             Function<Long, ObservableSource<Long>> {
-                println("left func ${it + 1}")
+                printlnWithTime("left func ${it + 1}")
                 Observable.timer(5, TimeUnit.SECONDS)
             },
             Function<Long, ObservableSource<Long>> {
-                println("right func ${it + 1}")
-                Observable.timer(0, TimeUnit.SECONDS)
+                printlnWithTime("right func ${it + 1}")
+                Observable.timer(2, TimeUnit.SECONDS)
             },
             io.reactivex.functions.BiFunction<Long, Long, String> { left, right -> "${left + 1} ${right + 1}" }
     ).subscribe({
@@ -102,8 +107,11 @@ fun andThenWhen() {
 fun switch() {
     val oneSec = Observable.interval(1, TimeUnit.SECONDS).takeUntil { time -> time < 5000 }
     val twoSec = Observable.interval(2, TimeUnit.SECONDS)
-//    Observable.fromIterable(nameList).startWith("123")
-    twoSec.startWith(oneSec)
+
+//    val test = Observable.just("1 ", "2 ")
+    val test = Observable.just(1L, 2L)
+    twoSec.startWith(test)
+//    Observable.fromIterable(nameList).startWith(test)
             .subscribe({
                 println("onNext = $it")
             }, {
@@ -115,4 +123,9 @@ fun switch() {
     Thread.sleep(5000)
 
     Thread.sleep(10000)
+}
+
+fun printlnWithTime(msg: Any?) {
+    val sdf = SimpleDateFormat("hh:mm:ss.SSS")
+    println(sdf.format(Date()).toString() + "   " +  msg)
 }
