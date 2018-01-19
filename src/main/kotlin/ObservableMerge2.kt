@@ -1,5 +1,7 @@
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.ObservableSource
+import io.reactivex.Single
 import io.reactivex.functions.Function
 import java.text.SimpleDateFormat
 import java.util.*
@@ -14,7 +16,26 @@ fun main(args: Array<String>) {
 //    join()
 //    combineLatest()
 //    andThenWhen()
-    switch()
+//    switch()
+
+
+    Maybe.fromCallable {
+        val nullableStr: String? = ""
+        nullableStr
+    }.flatMapSingle {
+        Single.just("Single")
+    }.subscribe(
+            ::println, // onSuccess
+            { it.printStackTrace() } // onError
+    )
+
+
+    Observable.fromIterable(numList)
+            .doOnNext { println(it) }
+            .all { it % 2 == 0 }
+            .doOnSuccess { println(it) }
+            .subscribe { it -> println(it) }
+
 }
 
 fun merge() {
